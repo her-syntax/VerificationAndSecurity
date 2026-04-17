@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: white;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 30px;
+      border-left: 20px solid teal;
+      border-right: 20px solid yellow;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h1 {
+      color: teal;
+      margin-bottom: 30px;
+    }
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    a {
+      display: block;
+      padding: 12px;
+      background-color: yellow;
+      color: teal;
+      font-weight: bold;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+    a:hover {
+      background-color: teal;
+      color: white;
+    }
+    .logout-btn {
+      margin-top: 25px;
+      padding: 10px 20px;
+      background-color: teal;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .logout-btn:hover {
+      background-color: #0b6f68;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Visual Presentation</h1>
+    <div class="nav">
+      <a href="VerificationsPortal.html">Verification Portal</a> 
+      <a href="Tracking.html">Driver's Portal</a>
+      <a href="Reviews.html">Reviews</a>
+      <a href="SystemUpdates.html">System's Portal</a>
+    </div>
+    <button class="logout-btn" type="button" onclick="window.location.href='Login.html'">Log Out</button>
+  </div>
+  <footer style="text-align: center; padding: 15px; margin-top: 20px; color: #555; font-size: 0.9rem; font-family: Arial, sans-serif;">
+    &copy; Designed by Amukelani Phakula
+  </footer>
+</body>
+</html>

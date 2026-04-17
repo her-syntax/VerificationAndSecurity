@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Delivery Portal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: white;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 700px;
+      margin: 50px auto;
+      padding: 20px;
+      border-left: 20px solid teal;
+      border-right: 20px solid yellow;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: teal;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      color: teal;
+    }
+    input[type="text"], input[type="password"], select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 2px solid teal;
+      border-radius: 4px;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      background-color: yellow;
+      color: teal;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: gold;
+    }
+    .status {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+      color: teal;
+    }
+    .confirmation {
+      margin-top: 25px;
+      border-top: 2px solid teal;
+      padding-top: 15px;
+    }
+    .line-items-list {
+      list-style: none;
+      padding-left: 0;
+      margin-top: 8px;
+    }
+    .line-items-list li {
+      margin-bottom: 8px;
+      border: 1px solid #9ed8d2;
+      padding: 8px;
+      border-radius: 4px;
+      background: #f7fffd;
+    }
+    .line-item-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 0;
+      font-weight: normal;
+      color: #0b6f68;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Delivery Portal</h2>
+    <form id="lockerForm">
+      <label for="facility">Full Name</label>
+      <input type="text" id="facility" name="facility" value="My Medical center" readonly required>
+
+      <label for="orderId">Order ID</label>
+      <select id="orderId" name="orderId" required>
+        <option value="">Select an order number</option>
+      </select>
+
+      <label for="pin">One-Time PIN</label>
+      <input type="password" id="pin" name="pin" placeholder="Enter your secure PIN" required>
+
+      <button type="submit">Enter</button>
+      <div class="status" id="statusMessage"></div>
+    </form>
+
+    <div class="confirmation" id="confirmationSection" style="display:none;">
+      <h3>Order Confirmation</h3>
+      <div id="orderDetails"></div>
+      <button type="button" id="submitDeliveryBtn">Submit Delivery</button>
+    </div>
+  </div>
+
+  <script>
+    const ORDER_STORAGE_KEY = 'submittedOrders';
+    const PRODUCT_DETAILS_KEY = 'lockerProductDetails';
+    let activeOrder = null;
+
+    function getStoredOrders() {
+      return JSON.parse(localStorage.getItem(ORDER_STORAGE_KEY) || '[]');
+    }
+
+    function populateOrderDropdown() {
+      const orderIdSelect = document.getElementById('orderId');
+      const orders = getStoredOrders();
+      orderIdSelect.innerHTML = '<option value="">Select an order number</option>';
+
+      orders.forEach((order) => {
+        const option = document.createElement('option');
+        option.value = order.orderNo;
+        option.textContent = `${order.orderNo} (${order.date || 'No date'})`;
+        orderIdSelect.appendChild(option);
+      });
+    }
+
+    function renderOrderDetails(order, facility) {
+      const orderDetails = document.getElementById('orderDetails');
+      activeOrder = order;
+      const storedProducts = JSON.parse(localStorage.getItem(PRODUCT_DETAILS_KEY) || '[]');
+      const productNames = (order.rows || []).map((row) => row.desc).filter(Boolean);
+      productNames.forEach((productName) => {
+        if (!storedProducts.includes(productName)) {
+          storedProducts.unshift(productName);
+        }
+      });
+      localStorage.setItem(PRODUCT_DETAILS_KEY, JSON.stringify(storedProducts));
+
+      const rows = (order.rows || []).map((row, index) => {
+        return (
+          `<li>` +
+          `<label class="line-item-label">` +
+          `<input type="checkbox" class="line-item-check" data-index="${index}">` +
+          `<span>${row.qty} x ${row.desc} @ R ${Number(row.price || 0).toFixed(2)} = R ${Number(row.amount || 0).toFixed(2)}</span>` +
+          `</label>` +
+          `</li>`
+        );
+      }).join('');
+
+      orderDetails.innerHTML =
+        `<p><strong>Order #${order.orderNo}</strong> confirmed for collection at ${facility}.</p>` +
+        `<p><strong>Client:</strong> ${order.practiceNumber || 'N/A'}<br><strong>Date:</strong> ${order.date || 'N/A'}</p>` +
+        `<p><strong>Line Items:</strong></p>` +
+        `<ul class="line-items-list">${rows || '<li>No line items available.</li>'}</ul>` +
+        `<p><strong>Subtotal:</strong> R ${Number(order.subtotal || 0).toFixed(2)}<br>` +
+        `<strong>Tax (15%):</strong> R ${Number(order.tax || 0).toFixed(2)}<br>` +
+        `<strong>Total:</strong> R ${Number(order.total || 0).toFixed(2)}</p>`;
+    }
+
+    document.getElementById('lockerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const facility = document.getElementById('facility').value;
+      const orderId = document.getElementById('orderId').value;
+      const pin = document.getElementById('pin').value;
+      const statusMessage = document.getElementById('statusMessage');
+      const confirmationSection = document.getElementById('confirmationSection');
+      const orderDetails = document.getElementById('orderDetails');
+
+      statusMessage.textContent = "Verifying credentials and confirming delivery...";
+      const selectedOrder = getStoredOrders().find((order) => order.orderNo === orderId);
+
+      // Simulated verification process
+      setTimeout(() => {
+        if (pin === "123456" && selectedOrder) { // Example PIN for demo
+          statusMessage.textContent = `Delivery for ${facility} confirmed.`;
+          confirmationSection.style.display = "block";
+          renderOrderDetails(selectedOrder, facility);
+        } else {
+          statusMessage.textContent = "Invalid PIN or order ID. Please try again.";
+          confirmationSection.style.display = "none";
+        }
+      }, 2000);
+    });
+
+    document.getElementById('submitDeliveryBtn').addEventListener('click', function () {
+      const allItems = document.querySelectorAll('.line-item-check');
+      const checkedItems = document.querySelectorAll('.line-item-check:checked');
+      const allChecked = allItems.length > 0 && checkedItems.length === allItems.length;
+
+      if (!activeOrder || !allChecked) {
+        alert('Incomplete delivery, please confirm all items before submitting.');
+        return;
+      }
+      window.location.href = 'DeliveryDetails.html';
+    });
+
+    populateOrderDropdown();
+  </script>
+  <footer style="text-align: center; padding: 15px; margin-top: 20px; color: #555; font-size: 0.9rem; font-family: Arial, sans-serif;">
+    &copy; Designed by Amukelani Phakula
+  </footer>
+</body>
+</html>

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quarterly Security & Compliance Reviews</title>
+
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoA6V49KzYPcU6L5l9hj+4E6zs5jD0h7xA4v+AMyF0Q0UKd"
+    crossorigin="anonymous"
+  />
+
+  <style>
+    :root {
+      --sheet-bg: #f4f9ff;
+      --sheet-header: #dbeafe;
+      --sheet-border: #cbd5e1;
+      --sheet-accent: #0f766e;
+      --sheet-text: #1f2937;
+    }
+
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(130deg, #eff6ff 0%, #f8fafc 55%, #ecfeff 100%);
+      color: var(--sheet-text);
+      min-height: 100vh;
+    }
+
+    .sheet-wrap {
+      background: #ffffff;
+      border: 1px solid var(--sheet-border);
+      border-radius: 14px;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.09);
+      overflow: hidden;
+    }
+
+    .sheet-header {
+      padding: 20px;
+      background: linear-gradient(90deg, #0f766e 0%, #0ea5a4 100%);
+      color: #ffffff;
+    }
+
+    .sheet-header h1 {
+      margin: 0 0 6px;
+      font-size: 1.55rem;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--sheet-bg);
+      border-bottom: 1px solid var(--sheet-border);
+    }
+
+    .status-pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #ecfeff;
+      border: 1px solid #99f6e4;
+      color: #134e4a;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .sheet-table-wrap {
+      overflow-x: auto;
+      background: #ffffff;
+    }
+
+    table {
+      width: 100%;
+      min-width: 1260px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--sheet-border);
+      padding: 8px;
+      vertical-align: top;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: var(--sheet-header);
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+    }
+
+    td.row-index {
+      width: 50px;
+      text-align: center;
+      font-weight: 600;
+      background: #f8fafc;
+    }
+
+    .cell-input,
+    .cell-select,
+    .cell-textarea {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 0.92rem;
+      color: var(--sheet-text);
+    }
+
+    .cell-textarea {
+      resize: vertical;
+      min-height: 46px;
+    }
+
+    .cell-select {
+      cursor: pointer;
+    }
+
+    .group-title {
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .conditions-panel {
+      border-top: 1px solid var(--sheet-border);
+      background: #f8fafc;
+      padding: 16px;
+    }
+
+    .conditions-panel h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      color: #0f172a;
+    }
+
+    .conditions-panel p {
+      margin: 0 0 10px;
+      color: #475569;
+      font-size: 0.92rem;
+    }
+
+    .conditions-textarea {
+      width: 100%;
+      min-height: 110px;
+      border: 1px solid var(--sheet-border);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.95rem;
+      color: var(--sheet-text);
+      resize: vertical;
+      background: #ffffff;
+    }
+
+    .conditions-actions {
+      margin-top: 10px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-sheet {
+      background: var(--sheet-accent);
+      border: none;
+      color: #ffffff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .btn-sheet:hover {
+      background: #115e59;
+    }
+
+    @media (max-width: 768px) {
+      .sheet-header h1 {
+        font-size: 1.25rem;
+      }
+
+      .sheet-header p {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container py-4 py-lg-5">
+    <div class="sheet-wrap">
+      <div class="sheet-header">
+        <h1>Quarterly Security & Compliance Review Sheet</h1>
+        <p class="mb-0">Editable tracker for SAHPRA, physical security, operational risk, and financial compliance controls.</p>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn-sheet" id="saveSnapshotBtn" type="button">Save Snapshot</button>
+        <span class="status-pill" id="saveStatus">No changes yet</span>
+      </div>
+
+      <div class="sheet-table-wrap">
+        <table aria-label="Quarterly Security and Compliance Review">
+          <thead>
+            <tr>
+              <th style="width: 240px;">Review Area</th>
+              <th style="width: 340px;">Action Item</th>
+              <th style="width: 180px;">Owner</th>
+              <th style="width: 160px;">Due Date</th>
+              <th style="width: 160px;">Status</th>
+              <th style="width: 190px;">Last Updated</th>
+            </tr>
+          </thead>
+          <tbody id="reviewRows"></tbody>
+        </table>
+        <div class="conditions-panel">
+          <h3>Notes</h3>
+          <p>Explain the conditions, findings, or supporting evidence for the quarter.</p>
+          <textarea id="overallConditions" class="conditions-textarea" placeholder="Explain the conditions or evidence here..."></textarea>
+          <div class="conditions-actions">
+            <button class="btn-sheet" id="conditionsUpdateBtn" type="button">Update Conditions</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const REVIEW_STORAGE_KEY = 'quarterlyReviewSheet';
+    const CONDITIONS_STORAGE_KEY = 'quarterlyReviewConditions';
+    const UPDATE_STORAGE_KEY = 'systemUpdates';
+    const reviewActionMap = {
+      'SAHPRA & Regulatory Compliance Audit': [
+        'Verification Logs Review',
+        'Licensing Status Check',
+        'Device Integrity Check'
+      ],
+      'Physical & Asset Security Assessment': [
+        'GPS & Asset Tagging Analysis',
+        'Locker Performance Review',
+        'Facility Security Update'
+      ],
+      'Operational Risk & Quality Control': [
+        'Sunk Cost Analysis',
+        'Intern & Staff Safety Briefing',
+        'Courier & Logistics Partner Evaluation'
+      ],
+      'Financial Compliance & Reserve Tracking': [
+        'Procurement Reserve Fund Status',
+        'Exchange Rate Risk Review'
+      ]
+    };
+    const reviewAreas = Object.keys(reviewActionMap);
+
+    const defaultRows = [
+      {
+        area: 'SAHPRA & Regulatory Compliance Audit',
+        action: '',
+        owner: '',
+        dueDate: '',
+        status: '',
+        updatedAt: ''
+      },
+      {
+        area: 'Physical & Asset Security Assessment',
+        action: '',
+        owner: '',
+        dueDate: '',
+        status: '',
+        updatedAt: ''
+      },
+      {
+        area: 'Operational Risk & Quality Control',
+        action: '',
+        owner: '',
+        dueDate: '',
+        status: '',
+        updatedAt: ''
+      },
+      {
+        area: 'Financial Compliance & Reserve Tracking',
+        action: '',
+        owner: '',
+        dueDate: '',
+        status: '',
+        updatedAt: ''
+      }
+    ];
+
+    let reviewRows = loadReviewRows();
+    let overallConditions = loadOverallConditions();
+    let autoSaveTimer = null;
+    let updateLogTimer = null;
+
+    function loadReviewRows() {
+      const stored = JSON.parse(localStorage.getItem(REVIEW_STORAGE_KEY) || 'null');
+      if (Array.isArray(stored) && stored.length) {
+        return reviewAreas.map(function(area) {
+          const storedRow = stored.find(function(row) {
+            return row.area === area;
+          }) || {};
+          const actions = reviewActionMap[area] || [];
+          const action = actions.includes(storedRow.action) ? storedRow.action : (actions[0] || '');
+
+          return {
+            area: area,
+            action: action,
+            owner: storedRow.owner || '',
+            dueDate: storedRow.dueDate || '',
+            status: storedRow.status || 'Not Started',
+            updatedAt: storedRow.updatedAt || ''
+          };
+        });
+      }
+      return defaultRows;
+    }
+
+    function loadOverallConditions() {
+      return localStorage.getItem(CONDITIONS_STORAGE_KEY) || '';
+    }
+
+    function saveReviewRows(triggerLabel) {
+      localStorage.setItem(REVIEW_STORAGE_KEY, JSON.stringify(reviewRows));
+      localStorage.setItem(CONDITIONS_STORAGE_KEY, overallConditions);
+      setSaveStatus('Saved at ' + new Date().toLocaleTimeString());
+      pushSystemUpdate(triggerLabel);
+    }
+
+    function clearReviewForm() {
+      clearTimeout(autoSaveTimer);
+      clearTimeout(updateLogTimer);
+
+      reviewRows = reviewAreas.map(function(area) {
+        const actions = reviewActionMap[area] || [];
+        return {
+          area: area,
+          action: actions[0] || '',
+          owner: '',
+          dueDate: '',
+          status: 'Not Started',
+          updatedAt: ''
+        };
+      });
+
+      overallConditions = '';
+      renderRows();
+      syncConditionsField();
+      setSaveStatus('Form cleared for new entry');
+    }
+
+    function queueAutoSave(triggerLabel) {
+      setSaveStatus('Saving...');
+      clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(function() {
+        saveReviewRows(triggerLabel);
+      }, 600);
+    }
+
+    function queueSystemUpdate(triggerLabel) {
+      clearTimeout(updateLogTimer);
+      updateLogTimer = setTimeout(function() {
+        pushSystemUpdate(triggerLabel);
+      }, 300);
+    }
+
+    function setSaveStatus(text) {
+      document.getElementById('saveStatus').textContent = text;
+    }
+
+    function pushSystemUpdate(triggerLabel) {
+      const updates = JSON.parse(localStorage.getItem(UPDATE_STORAGE_KEY) || '[]');
+      updates.push({
+        type: 'review',
+        message: 'Quarterly review sheet updated: ' + triggerLabel,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem(UPDATE_STORAGE_KEY, JSON.stringify(updates));
+    }
+
+    function renderRows() {
+      const tbody = document.getElementById('reviewRows');
+      tbody.innerHTML = '';
+
+      reviewRows.forEach(function(row, index) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span class="group-title">${escapeHtml(row.area || '')}</span></td>
+          <td>
+            <select class="cell-select" data-field="action" data-index="${index}">
+              ${renderActionOptions(row.area, row.action)}
+            </select>
+          </td>
+          <td><input class="cell-input" data-field="owner" data-index="${index}" value="${escapeHtml(row.owner || '')}" placeholder="Responsible person" /></td>
+          <td><input class="cell-input" type="date" data-field="dueDate" data-index="${index}" value="${escapeHtml(row.dueDate || '')}" /></td>
+          <td>
+            <select class="cell-select" data-field="status" data-index="${index}">
+              ${renderStatusOption('Not Started', row.status)}
+              ${renderStatusOption('In Progress', row.status)}
+              ${renderStatusOption('Blocked', row.status)}
+              ${renderStatusOption('Completed', row.status)}
+            </select>
+          </td>
+          <td><input class="cell-input" data-field="updatedAt" data-index="${index}" value="${escapeHtml(row.updatedAt || '')}" placeholder="Auto-filled on edit" /></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      attachCellListeners();
+    }
+
+    function renderStatusOption(optionValue, selectedValue) {
+      const selected = optionValue === selectedValue ? 'selected' : '';
+      return `<option value="${optionValue}" ${selected}>${optionValue}</option>`;
+    }
+
+    function renderActionOptions(area, selectedAction) {
+      const actions = reviewActionMap[area] || [];
+      return actions.map(function(action) {
+        const selected = action === selectedAction ? 'selected' : '';
+        return `<option value="${escapeHtml(action)}" ${selected}>${escapeHtml(action)}</option>`;
+      }).join('');
+    }
+
+    function attachCellListeners() {
+      const cells = document.querySelectorAll('[data-field]');
+      cells.forEach(function(cell) {
+        cell.addEventListener('input', onCellEdit);
+        cell.addEventListener('change', onCellEdit);
+      });
+    }
+
+    function onCellEdit(event) {
+      const index = Number(event.target.dataset.index);
+      const field = event.target.dataset.field;
+      reviewRows[index][field] = event.target.value;
+
+      reviewRows[index].updatedAt = new Date().toLocaleString();
+
+      const updatedAtInputs = document.querySelectorAll(`[data-index="${index}"][data-field="updatedAt"]`);
+      updatedAtInputs.forEach(function(input) {
+        input.value = reviewRows[index].updatedAt;
+      });
+
+      queueSystemUpdate('Row ' + (index + 1) + ' - ' + field);
+      queueAutoSave('Row ' + (index + 1) + ' - ' + field);
+    }
+
+    function syncConditionsField() {
+      const field = document.getElementById('overallConditions');
+      if (field) {
+        field.value = overallConditions;
+        field.addEventListener('input', function(event) {
+          overallConditions = event.target.value;
+          queueSystemUpdate('Conditions / Evidence');
+          queueAutoSave('Conditions / Evidence');
+        });
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    document.getElementById('saveSnapshotBtn').addEventListener('click', function() {
+      saveReviewRows('Manual snapshot save');
+      clearReviewForm();
+      alert('Quarterly review sheet snapshot saved.');
+    });
+
+    document.getElementById('conditionsUpdateBtn').addEventListener('click', function() {
+      saveReviewRows('Conditions panel button');
+      clearReviewForm();
+      alert('Conditions update saved and posted to System Updates.');
+    });
+
+    renderRows();
+    syncConditionsField();
+  </script>
+  <footer style="text-align: center; padding: 15px; margin-top: 20px; color: #555; font-size: 0.9rem; font-family: Arial, sans-serif;">
+    &copy; Designed by Amukelani Phakula
+  </footer>
+</body>
+</html>

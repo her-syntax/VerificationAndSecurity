@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+  <style>
+    :root {
+      --primary-color: teal;
+      --accent-color: #ffd700;
+      --text-color: #1f2937;
+      --bg-color: #f7fafc;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 480px;
+      background: #ffffff;
+      border-left: 16px solid var(--primary-color);
+      border-right: 16px solid var(--accent-color);
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      text-align: center;
+      color: var(--primary-color);
+    }
+
+    p {
+      margin: 0 0 20px;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 6px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      box-sizing: border-box;
+      border: 2px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      font-size: 1rem;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 6px;
+      background: var(--accent-color);
+      color: var(--primary-color);
+      padding: 12px 14px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    button:hover {
+      background: #f0ca00;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Login</h1>
+    <form id="loginForm" action="Home.html" method="get">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" required>
+
+      <label for="surname">Surname</label>
+      <input type="text" id="surname" name="surname" required>
+
+      <button type="submit">Login</button>
+    </form>
+  </main>
+
+  <script>
+    function readUpdates() {
+      try {
+        return JSON.parse(localStorage.getItem('systemUpdates') || '[]');
+      } catch (error) {
+        return [];
+      }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function () {
+      const name = document.getElementById('name').value.trim();
+      const surname = document.getElementById('surname').value.trim();
+
+      if (!name || !surname) {
+        return;
+      }
+
+      const updates = readUpdates();
+      updates.push({
+        type: 'login',
+        message: `User logged in: ${name} ${surname}`,
+        timestamp: new Date().toISOString(),
+        user: {
+          name: name,
+          surname: surname
+        }
+      });
+
+      localStorage.setItem('systemUpdates', JSON.stringify(updates));
+    });
+  </script>
+  <footer style="text-align: center; padding: 15px; margin-top: 20px; color: #555; font-size: 0.9rem; font-family: Arial, sans-serif;">
+    &copy; Designed by Amukelani Phakula
+  </footer>
+</body>
+</html>

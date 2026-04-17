@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ECG Monitor & Vehicle Tracking</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: white;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+      border-left: 20px solid teal;
+      border-right: 20px solid yellow;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: teal;
+      text-align: center;
+    }
+    .section {
+      border: 2px solid teal;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+    }
+    .section h3 {
+      margin: 0;
+      color: teal;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 8px 15px;
+      background-color: yellow;
+      color: teal;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Tracking Status</h2>
+    <div class="section">
+      <h3>Driver's last report Location</h3>
+      <button onclick="lastLocation()">Last Known Location</button>
+    </div>
+    <div class="section">
+      <h3>Car Tracking</h3>
+      <button onclick="CarLocation()">Last Known Location</button>
+    </div>
+  </div>
+    
+  <script>
+    function lastLocation() {
+      alert("The driver has reported their last known location. Redirecting to the map now.");
+      setTimeout(() => {
+        window.location.href = "Location.html";
+      }, 2500);
+    }
+    function CarLocation() {
+      alert("Delivery vehicle car tracking");
+      setTimeout(() => {
+        window.location.href = "CarTracking.html";
+      }, 2500);
+    }
+
+    function goHome() {
+      window.location.href = "Home.html";
+    }
+  </script>
+  <footer style="text-align: center; padding: 15px; margin-top: 20px; color: #555; font-size: 0.9rem; font-family: Arial, sans-serif;">
+    &copy; Designed by Amukelani Phakula
+  </footer>
+</body>
+</html>
+
+

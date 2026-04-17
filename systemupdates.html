@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Updates</title>
+  <style>
+    :root {
+      --primary-color: teal;
+      --accent-color: #ffd700;
+      --text-color: #1f2937;
+      --bg-color: #f7fafc;
+    }
+
+    body {
+      margin: 0;
+      padding: 30px 16px;
+      font-family: Arial, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      border-left: 16px solid var(--primary-color);
+      border-right: 16px solid var(--accent-color);
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      color: var(--primary-color);
+      text-align: center;
+    }
+
+    p {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .login-banner {
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      background: #f8fafc;
+      color: #0f766e;
+      font-weight: bold;
+    }
+
+    button {
+      border: none;
+      background: var(--accent-color);
+      color: var(--primary-color);
+      padding: 10px 14px;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #f0ca00;
+    }
+
+    .empty {
+      text-align: center;
+      border: 2px dashed #cbd5e1;
+      padding: 20px;
+      border-radius: 6px;
+      color: #64748b;
+    }
+
+    .entry {
+      border: 1px solid #d1d5db;
+      border-left: 5px solid var(--primary-color);
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: #ffffff;
+    }
+
+    .entry.loss {
+      border-left-color: #dc2626;
+    }
+
+    .entry-actions {
+      margin-top: 12px;
+    }
+
+    .track-button {
+      display: inline-block;
+      text-decoration: none;
+      border: none;
+      background: teal;
+      color: #ffffff;
+      padding: 10px 14px;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .track-button:hover {
+      background: #0f766e;
+    }
+
+    .meta {
+      font-size: 0.9rem;
+      color: #4b5563;
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Internal System Updates</h1>
+    <p>This page is for system monitoring updates.</p>
+
+
+    <div class="toolbar">
+      <button type="button" onclick="clearUpdates()">Clear Updates</button>
+    </div>
+
+    <div id="updatesContainer"></div>
+  </div>
+
+  <script>
+    function readUpdates() {
+      return JSON.parse(localStorage.getItem('systemUpdates') || '[]');
+    }
+
+    function renderUpdates() {
+      const updates = readUpdates().slice().reverse();
+      const container = document.getElementById('updatesContainer');
+      container.innerHTML = '';
+
+      if (!updates.length) {
+        container.innerHTML = '<div class="empty">No system updates yet.</div>';
+        return;
+      }
+
+      updates.forEach(function(update) {
+        const item = document.createElement('div');
+        item.className = `entry ${update.type === 'loss' ? 'loss' : ''}`;
+
+        const timeText = update.timestamp ? new Date(update.timestamp).toLocaleString() : 'Unknown time';
+        const actionButton = update.type === 'loss'
+          ? '<div class="entry-actions"><a class="track-button" href="TrackingStatus.html">Track Status</a></div>'
+          : '';
+        item.innerHTML = `
+          <div class="meta"><strong>Type:</strong> ${update.type || 'update'} | <strong>Time:</strong> ${timeText}</div>
+          <div>${update.message || ''}</div>
+          ${actionButton}
+        `;
+
+        container.appendChild(item);
+      });
+    }
+
+    function clearUpdates() {
+      localStorage.setItem('systemUpdates', '[]');
+      renderUpdates();
+    }
+    renderUpdates();
+  </script>
+  <footer style="text-align: center; padding: 15px; margin-top: 20px; color: #555; font-size: 0.9rem; font-family: Arial, sans-serif;">
+    &copy; Designed by Amukelani Phakula
+  </footer>
+</body>
+</html>

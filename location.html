@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tracking the vehicle</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  >
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: white;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+      border-left: 20px solid teal;
+      border-right: 20px solid yellow;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      color: teal;
+      text-align: center;
+      margin-top: 0;
+    }
+
+    .section {
+      border: 2px solid teal;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+    }
+
+    .section h3 {
+      margin: 0;
+      color: teal;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-weight: bold;
+      color: teal;
+      line-height: 1.5;
+      min-height: 24px;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 8px 15px;
+      background-color: yellow;
+      color: teal;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    #map {
+      margin-top: 20px;
+      height: 360px;
+      border: 2px solid teal;
+      border-radius: 5px;
+    }
+
+    .done-button {
+      display: block;
+      width: 100%;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Tracking the vehicle</h2>
+
+    <div class="section">
+      <h3>Delivery Vehicle</h3>
+      <p>Tracked continuously during transit.</p>
+      <button type="button" onclick="trackDevice()">Track Device Location</button>
+      <div class="status" id="vehicleStatus"></div>
+    </div>
+
+    <div id="map">Map will display the device location here.</div>
+    <button type="button" class="done-button" onclick="goHome()">Done</button>
+  </div>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <script>
+    const routePoints = [
+      { name: 'Parkwest Road', latitude: -29.1069, longitude: 26.1766 },
+      { name: 'Universitas', latitude: -29.1180, longitude: 26.1760 },
+      { name: 'Westdene', latitude: -29.1088, longitude: 26.2205 },
+      { name: 'Brandwag', latitude: -29.0959, longitude: 26.2080 }
+    ];
+
+    let map = null;
+    let vehicleMarker = null;
+    let routeLine = null;
+    let animationId = null;
+    let speedTimerId = null;
+    let lastFrameTime = null;
+    let currentRouteIndex = 0;
+    let currentPosition = { ...routePoints[0] };
+    let currentSpeed = 150;
+    let speedPhase = 'upTo180';
+    let isTracking = false;
+
+    function initializeMap() {
+      map = L.map('map').setView([routePoints[0].latitude, routePoints[0].longitude], 13);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      vehicleMarker = L.marker([routePoints[0].latitude, routePoints[0].longitude]).addTo(map);
+      routeLine = L.polyline([[routePoints[0].latitude, routePoints[0].longitude]], {
+        color: 'teal',
+        weight: 4
+      }).addTo(map);
+    }
+
+    function distanceMeters(a, b) {
+      const earthRadius = 6371000;
+      const lat1 = a.latitude * Math.PI / 180;
+      const lat2 = b.latitude * Math.PI / 180;
+      const deltaLat = (b.latitude - a.latitude) * Math.PI / 180;
+      const deltaLng = (b.longitude - a.longitude) * Math.PI / 180;
+      const sinLat = Math.sin(deltaLat / 2);
+      const sinLng = Math.sin(deltaLng / 2);
+      const h = sinLat * sinLat + Math.cos(lat1) * Math.cos(lat2) * sinLng * sinLng;
+      return 2 * earthRadius * Math.asin(Math.sqrt(h));
+    }
+
+    function interpolatePosition(start, end, fraction) {
+      return {
+        latitude: start.latitude + (end.latitude - start.latitude) * fraction,
+        longitude: start.longitude + (end.longitude - start.longitude) * fraction
+      };
+    }
+
+    function updateStatus() {
+      const activePoint = routePoints[currentRouteIndex % routePoints.length];
+      document.getElementById('vehicleStatus').textContent = `Location: ${activePoint.name}. Speed: ${currentSpeed} km/h.`;
+    }
+
+    function advanceSpeed() {
+      if (speedPhase === 'upTo180') {
+        currentSpeed += 1;
+        if (currentSpeed >= 180) {
+          currentSpeed = 180;
+          speedPhase = 'resetTo150';
+        }
+      } else if (speedPhase === 'resetTo150') {
+        currentSpeed = 150;
+        speedPhase = 'upTo220';
+      } else if (speedPhase === 'upTo220') {
+        currentSpeed += 1;
+        if (currentSpeed >= 220) {
+          currentSpeed = 220;
+          speedPhase = 'downTo180';
+        }
+      } else if (speedPhase === 'downTo180') {
+        currentSpeed -= 1;
+        if (currentSpeed <= 180) {
+          currentSpeed = 180;
+          speedPhase = 'resetTo150';
+        }
+      }
+
+      updateStatus();
+    }
+
+    function updateMarker(position) {
+      const latLng = [position.latitude, position.longitude];
+      vehicleMarker.setLatLng(latLng);
+      routeLine.addLatLng(latLng);
+      map.panTo(latLng, { animate: false });
+    }
+
+    function stopTracking() {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+      if (speedTimerId) {
+        clearInterval(speedTimerId);
+        speedTimerId = null;
+      }
+    }
+
+    function trackLoop(timestamp) {
+      if (!isTracking) {
+        return;
+      }
+
+      if (lastFrameTime === null) {
+        lastFrameTime = timestamp;
+      }
+
+      const deltaSeconds = (timestamp - lastFrameTime) / 1000;
+      lastFrameTime = timestamp;
+
+      const nextPoint = routePoints[(currentRouteIndex + 1) % routePoints.length];
+      const segmentDistance = distanceMeters(currentPosition, nextPoint);
+      const travelMeters = (currentSpeed / 3.6) * deltaSeconds;
+
+      if (segmentDistance <= 2 || travelMeters >= segmentDistance) {
+        currentPosition = { ...nextPoint };
+        currentRouteIndex = (currentRouteIndex + 1) % routePoints.length;
+      } else {
+        const fraction = travelMeters / segmentDistance;
+        currentPosition = interpolatePosition(currentPosition, nextPoint, fraction);
+      }
+
+      updateMarker(currentPosition);
+      updateStatus();
+      animationId = requestAnimationFrame(trackLoop);
+    }
+
+    function trackDevice() {
+      if (!map) {
+        initializeMap();
+      }
+
+      stopTracking();
+      isTracking = true;
+      currentRouteIndex = 0;
+      currentPosition = { ...routePoints[0] };
+      currentSpeed = 150;
+      speedPhase = 'upTo180';
+      lastFrameTime = null;
+
+      routeLine.setLatLngs([[currentPosition.latitude, currentPosition.longitude]]);
+      vehicleMarker.setLatLng([currentPosition.latitude, currentPosition.longitude]);
+      map.setView([currentPosition.latitude, currentPosition.longitude], 13);
+      updateStatus();
+
+      speedTimerId = setInterval(advanceSpeed, 1000);
+      animationId = requestAnimationFrame(trackLoop);
+    }
+
+    function goHome() {
+      window.location.href = 'Home.html';
+    }
+
+    initializeMap();
+  </script>
+  <footer style="text-align: center; padding: 15px; margin-top: 20px; color: #555; font-size: 0.9rem; font-family: Arial, sans-serif;">
+    &copy; Designed by Amukelani Phakula
+  </footer>
+</body>
+</html>

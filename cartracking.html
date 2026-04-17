@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Car Tracking</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7fafc;
+      margin: 0;
+      padding: 0;
+      color: #103b39;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 32px auto;
+      padding: 20px;
+      border-left: 20px solid teal;
+      border-right: 20px solid yellow;
+      background: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      margin: 0 0 18px;
+      color: teal;
+      text-align: center;
+    }
+
+    .section {
+      border: 2px solid teal;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 18px;
+      background: #fff;
+    }
+
+    .section h3 {
+      margin: 0 0 10px;
+      color: teal;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: teal;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      border: 2px solid teal;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    button {
+      margin-top: 12px;
+      padding: 10px 16px;
+      background: yellow;
+      color: teal;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background: gold;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-weight: bold;
+      color: teal;
+      line-height: 1.5;
+      min-height: 24px;
+    }
+
+    #map {
+      height: 520px;
+      border: 2px solid teal;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #eef7f6;
+    }
+
+    .current-stop {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border: 2px solid #0f766e;
+      border-radius: 6px;
+      background: #f8fffe;
+      color: #0f766e;
+      font-weight: 700;
+      font-size: 16px;
+      min-height: 22px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    @media (min-width: 960px) {
+      .grid {
+        grid-template-columns: 360px 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Car Tracking</h2>
+
+    <div class="grid">
+      <div>
+        <div class="section">
+          <h3>Find Driver Phone</h3>
+          <label for="imeiInput">Enter IMEI Number</label>
+          <input type="text" id="imeiInput" value="123456789009876" placeholder="15-digit IMEI" maxlength="15" inputmode="numeric">
+          <button type="button" id="findPhoneBtn">Find Phone</button>
+          <div class="status" id="phoneStatus"></div>
+        </div>
+
+        <div class="section">
+          <h3>Current Stop</h3>
+          <div class="current-stop" id="currentStop">Waiting for IMEI check...</div>
+          <div class="status" id="sequenceStatus"></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Live Map</h3>
+        <div id="map"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const DRIVER_PHONE_KEY = 'driverPhoneImei';
+    const DEVICE_LOCATION_KEY = 'deviceLocation';
+
+    const mapCenter = [-29.0852, 26.1596];
+    const cityCenters = {
+      Bloemfontein: [-29.0852, 26.1596],
+      Welkom: [-27.9774, 26.7359],
+      Kroonstad: [-27.6526, 27.2348],
+      Phuthaditjhaba: [-28.5333, 28.8167]
+    };
+
+    const freeStateStops = [
+      { name: 'Universitas Academic Hospital', city: 'Bloemfontein' },
+      { name: 'National District Hospital', city: 'Bloemfontein' },
+      { name: 'Life Rosepark Hospital', city: 'Bloemfontein' },
+      { name: 'Mediclinic Bloemfontein', city: 'Bloemfontein' },
+      { name: 'Universitas Private Hospital', city: 'Bloemfontein' },
+      { name: 'Emoyamed Bloemfontein', city: 'Bloemfontein' },
+      { name: 'Netcare Pelonomi Hospital', city: 'Bloemfontein' },
+      { name: 'Universitas Hospital Day Clinic', city: 'Bloemfontein' },
+      { name: 'Boitumelo Regional Hospital', city: 'Kroonstad' },
+      { name: 'Elizabeth Ross District Hospital', city: 'Phuthaditjhaba' },
+      { name: 'Willows Pharmacy', city: 'Bloemfontein' },
+      { name: 'Arrie Nel Preller Plein Pharmacy', city: 'Bloemfontein' },
+      { name: 'ChecMed Pharmacy', city: 'Bloemfontein' },
+      { name: 'Medibloem Pharmacy', city: 'Bloemfontein' },
+      { name: 'Medi-Chem Rosepark Pharmacy', city: 'Bloemfontein' },
+      { name: 'The Local Choice Pharmacy Medirex', city: 'Bloemfontein' },
+      { name: 'The Local Choice Pharmacy Bloemfontein', city: 'Bloemfontein' },
+      { name: 'Medi-Chem Pellisier Pharmacy', city: 'Bloemfontein' },
+      { name: 'Die Voortrekker Pharmacy', city: 'Bloemfontein' },
+      { name: 'CCMDD Medirex Pharmacy', city: 'Bloemfontein' },
+      { name: 'Sentrum Pharmacy', city: 'Welkom' },
+      { name: 'Elizabeth Street Pharmacy', city: 'Welkom' },
+      { name: 'Arrie Nel Jan Cilliers Park Pharmacy', city: 'Welkom' },
+      { name: 'Chameleon Pharmacy', city: 'Welkom' },
+      { name: 'Masupatsela Pharmacy', city: 'Welkom' },
+      { name: 'The Local Choice Frank Korb', city: 'Welkom' },
+      { name: 'MediRite Welkom', city: 'Welkom' },
+      { name: 'Rendezvous Pharmacy', city: 'Welkom' },
+      { name: 'Clicks Pharmacy Liberty Centre', city: 'Welkom' },
+      { name: 'Sentrum Chemist', city: 'Welkom' }
+    ];
+
+    let map = null;
+    let driverMarker = null;
+    let routeLine = null;
+    let stopMarkers = [];
+    let travelTimer = null;
+    let waitTimer = null;
+    let activeSequence = [];
+    let activeIndex = 0;
+
+    function hashString(text) {
+      let hash = 0;
+      for (let i = 0; i < text.length; i += 1) {
+        hash = (hash * 31 + text.charCodeAt(i)) >>> 0;
+      }
+      return hash;
+    }
+
+    function buildFallbackCoordinates(stop) {
+      const center = cityCenters[stop.city] || mapCenter;
+      const hash = hashString(stop.name);
+      const latOffset = ((hash % 11) - 5) * 0.0032;
+      const lngOffset = (((hash / 11) % 11 | 0) - 5) * 0.0032;
+      return {
+        ...stop,
+        latitude: center[0] + latOffset,
+        longitude: center[1] + lngOffset
+      };
+    }
+
+    function geocodeStop(stop) {
+      const query = `${stop.name}, ${stop.city}, Free State, South Africa`;
+      return fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(query)}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (Array.isArray(data) && data.length > 0) {
+            return {
+              ...stop,
+              latitude: Number(data[0].lat),
+              longitude: Number(data[0].lon)
+            };
+          }
+          return buildFallbackCoordinates(stop);
+        })
+        .catch(() => buildFallbackCoordinates(stop));
+    }
+
+    async function resolveStops() {
+      const resolved = await Promise.all(freeStateStops.map(geocodeStop));
+      return resolved;
+    }
+
+    function initMap(center) {
+      if (!map) {
+        map = L.map('map', { zoomControl: true }).setView(center, 8);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+      } else {
+        map.setView(center, 8);
+      }
+    }
+
+    function clearMapLayers() {
+      if (driverMarker) {
+        map.removeLayer(driverMarker);
+        driverMarker = null;
+      }
+      if (routeLine) {
+        map.removeLayer(routeLine);
+        routeLine = null;
+      }
+      stopMarkers.forEach((marker) => map.removeLayer(marker));
+      stopMarkers = [];
+    }
+
+    function setStatusText(text) {
+      document.getElementById('sequenceStatus').textContent = text;
+    }
+
+    function setCurrentStop(name) {
+      document.getElementById('currentStop').textContent = name;
+    }
+
+    function stopMovement() {
+      if (travelTimer) {
+        clearInterval(travelTimer);
+        travelTimer = null;
+      }
+      if (waitTimer) {
+        clearTimeout(waitTimer);
+        waitTimer = null;
+      }
+    }
+
+    function getCurrentGeoPosition() {
+      return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+          resolve({ latitude: mapCenter[0], longitude: mapCenter[1], fallback: true });
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              accuracy: Math.round(position.coords.accuracy),
+              fallback: false
+            });
+          },
+          () => {
+            resolve({ latitude: mapCenter[0], longitude: mapCenter[1], fallback: true });
+          },
+          { enableHighAccuracy: true, maximumAge: 5000, timeout: 12000 }
+        );
+      });
+    }
+
+    function animateToTarget(target, onArrive) {
+      stopMovement();
+
+      travelTimer = setInterval(() => {
+        const current = driverMarker.getLatLng();
+        const latDiff = target.latitude - current.lat;
+        const lngDiff = target.longitude - current.lng;
+        const distance = Math.hypot(latDiff, lngDiff);
+
+        if (distance < 0.00035) {
+          driverMarker.setLatLng([target.latitude, target.longitude]);
+          routeLine.addLatLng([target.latitude, target.longitude]);
+          map.panTo([target.latitude, target.longitude], { animate: false });
+          stopMovement();
+          onArrive();
+          return;
+        }
+
+        const step = 0.02;
+        const nextLat = current.lat + (latDiff * step);
+        const nextLng = current.lng + (lngDiff * step);
+
+        driverMarker.setLatLng([nextLat, nextLng]);
+        routeLine.addLatLng([nextLat, nextLng]);
+        map.panTo([nextLat, nextLng], { animate: false });
+      }, 1);
+    }
+
+    function runSequence(startPoint, stops) {
+      stopMovement();
+      activeSequence = stops;
+      activeIndex = 0;
+
+      clearMapLayers();
+      initMap([startPoint.latitude, startPoint.longitude]);
+
+      driverMarker = L.marker([startPoint.latitude, startPoint.longitude], {
+        title: 'Driver phone location'
+      }).addTo(map);
+
+      routeLine = L.polyline([[startPoint.latitude, startPoint.longitude]], {
+        color: 'teal',
+        weight: 4
+      }).addTo(map);
+
+      stopMarkers = stops.map((stop) => {
+        return L.circleMarker([stop.latitude, stop.longitude], {
+          radius: 5,
+          color: '#0f766e',
+          fillColor: '#ffd700',
+          fillOpacity: 0.9,
+          weight: 2
+        }).bindPopup(stop.name).addTo(map);
+      });
+
+      const goNext = () => {
+        if (activeIndex >= activeSequence.length) {
+          setCurrentStop('Tracking complete');
+          setStatusText('All hospitals and pharmacies have been visited.');
+          return;
+        }
+
+        const target = activeSequence[activeIndex];
+        setCurrentStop(target.name);
+        setStatusText(target.name);
+
+        animateToTarget(target, () => {
+          setCurrentStop(target.name);
+          setStatusText(target.name);
+          waitTimer = setTimeout(() => {
+            activeIndex += 1;
+            goNext();
+          }, 5000);
+        });
+      };
+
+      goNext();
+    }
+
+    async function findDriverPhone() {
+      const imeiInput = document.getElementById('imeiInput');
+      const phoneStatus = document.getElementById('phoneStatus');
+      const imei = imeiInput.value.trim();
+
+      if (!/^\d{15}$/.test(imei)) {
+        phoneStatus.textContent = 'Please enter a valid 15-digit IMEI number.';
+        return;
+      }
+
+      phoneStatus.textContent = 'IMEI accepted. Checking live phone location...';
+      localStorage.setItem(DRIVER_PHONE_KEY, imei);
+
+      const startPoint = await getCurrentGeoPosition();
+      const stops = await resolveStops();
+
+      localStorage.setItem(DEVICE_LOCATION_KEY, JSON.stringify({
+        latitude: startPoint.latitude,
+        longitude: startPoint.longitude,
+        timestamp: new Date().toISOString()
+      }));
+
+      phoneStatus.textContent = 'Driver phone located. Map is now tracking the route.';
+      setCurrentStop(stops.length ? stops[0].name : 'Tracking active');
+      setStatusText(stops.length ? stops[0].name : 'Tracking active');
+
+      runSequence(startPoint, stops);
+    }
+
+    document.getElementById('findPhoneBtn').addEventListener('click', findDriverPhone);
+
+    initMap(mapCenter);
+    setCurrentStop('Waiting for IMEI check...');
+  </script>
+  <footer style="text-align: center; padding: 15px; margin-top: 20px; color: #555; font-size: 0.9rem; font-family: Arial, sans-serif;">
+    &copy; Designed by Amukelani Phakula
+  </footer>
+</body>
+</html>

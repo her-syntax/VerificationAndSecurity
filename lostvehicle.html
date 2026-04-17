@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Report Stolen Car</title>
+  <style>
+    body {
+      background-color: #f9f9f9;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      border-left: 10px solid teal;
+      border-right: 10px solid teal;
+      padding: 40px;
+      margin: 50px auto;
+      width: 50%;
+      background-color: white;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      color: teal;
+    }
+
+    label {
+      font-weight: bold;
+      color: #333;
+    }
+
+    input[type="text"], select {
+      width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 2px solid teal;
+      border-radius: 5px;
+    }
+
+    select[multiple] {
+      height: 140px;
+    }
+
+    input[type="submit"] {
+      background-color: yellow;
+      color: blue;
+      font-weight: bold;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    input[type="submit"]:hover {
+      background-color: gold;
+    }
+
+    .popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .popup-box {
+      width: min(90%, 420px);
+      background: #fff;
+      border-left: 12px solid teal;
+      border-right: 12px solid yellow;
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .popup-box p {
+      margin: 0 0 14px;
+      color: #11403c;
+      font-weight: bold;
+    }
+
+    .popup-box button {
+      width: 100%;
+      background-color: yellow;
+      color: teal;
+      font-weight: bold;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .popup-box button:hover {
+      background-color: gold;
+    }
+  </style>
+  <script>
+    const DRIVER_NAMES_KEY = 'deliveryDriverNames';
+    const CAR_MODELS_KEY = 'deliveryCarModels';
+    const PRODUCT_DETAILS_KEY = 'lockerProductDetails';
+
+    function getStoredList(key) {
+      return JSON.parse(localStorage.getItem(key) || '[]');
+    }
+
+    function populateSelect(selectId, storageKey, placeholderText) {
+      const select = document.getElementById(selectId);
+      const values = getStoredList(storageKey);
+      select.innerHTML = `<option value="">${placeholderText}</option>`;
+
+      values.forEach((value) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+      });
+    }
+
+    function removeValuesFromStoredList(key, valuesToRemove) {
+      const filteredRemovals = valuesToRemove.filter(Boolean);
+      if (!filteredRemovals.length) {
+        return;
+      }
+
+      const removals = new Set(filteredRemovals);
+      const existing = getStoredList(key);
+      const updated = existing.filter((value) => !removals.has(value));
+      localStorage.setItem(key, JSON.stringify(updated));
+    }
+
+    function reportStolenCar(event) {
+      event.preventDefault(); // Prevents the form from refreshing the page
+      const name = document.getElementById('name').value.trim();
+      const carReg = document.getElementById('carReg').value.trim();
+      const reportType = document.getElementById('reportType').value;
+      const productSelect = document.getElementById('productDetails');
+      const selectedProducts = Array.from(productSelect.selectedOptions)
+        .map((option) => option.value)
+        .filter(Boolean);
+      const productDetails = selectedProducts.join(', ');
+
+      const lossMessage = `Loss Report: ${reportType} reported lost by ${name}. Car registration: ${carReg}. Product details: ${productDetails || 'N/A'}.`;
+      const storedLogs = JSON.parse(localStorage.getItem('systemUpdates') || '[]');
+      storedLogs.push({
+        type: 'loss',
+        message: lossMessage,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('systemUpdates', JSON.stringify(storedLogs));
+
+      removeValuesFromStoredList(DRIVER_NAMES_KEY, [name]);
+      removeValuesFromStoredList(CAR_MODELS_KEY, [carReg]);
+      removeValuesFromStoredList(PRODUCT_DETAILS_KEY, selectedProducts);
+
+      document.getElementById('submitPopup').style.display = 'flex';
+      event.target.reset();
+      populateSelect('name', DRIVER_NAMES_KEY, 'Select a name and surname');
+      populateSelect('carReg', CAR_MODELS_KEY, 'Select a car model');
+      populateSelect('productDetails', PRODUCT_DETAILS_KEY, 'Select product details');
+    }
+
+    function closeSubmitPopup() {
+      document.getElementById('submitPopup').style.display = 'none';
+      window.location.href = 'SystemUpdates.html';
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h2>Report a Stolen Car</h2>
+    <form onsubmit="reportStolenCar(event)">
+      <label for="name">Name and Surname:</label><br>
+      <select id="name" name="name" required>
+        <option value="">Select a name and surname</option>
+      </select><br><br>
+
+      <label for="reportType">What is lost?</label><br>
+      <input type="text" id="reportType" name="reportType" placeholder="Car, Product, or Car and Product" required><br><br>
+
+      <label for="carReg">Car Registration Number:</label><br>
+      <select id="carReg" name="carReg" required>
+        <option value="">Select a car model</option>
+      </select><br><br>
+
+      <label for="productDetails">Product Details (if applicable):</label><br>
+      <select id="productDetails" name="productDetails" multiple>
+      </select><br><br>
+
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+
+  <div class="popup-overlay" id="submitPopup">
+    <div class="popup-box">
+      <p>Your loss report has been submitted.</p>
+      <button type="button" onclick="closeSubmitPopup()">OK</button>
+    </div>
+  </div>
+
+  <script>
+    populateSelect('name', DRIVER_NAMES_KEY, 'Select a name and surname');
+    populateSelect('carReg', CAR_MODELS_KEY, 'Select a car model');
+    populateSelect('productDetails', PRODUCT_DETAILS_KEY, 'Select product details');
+  </script>
+  <footer style="text-align: center; padding: 15px; margin-top: 20px; color: #555; font-size: 0.9rem; font-family: Arial, sans-serif;">
+    &copy; Designed by Amukelani Phakula
+  </footer>
+</body>
+</html>
