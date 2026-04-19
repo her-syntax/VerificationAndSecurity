@@ -39,7 +39,6 @@
       margin-top: 4px;
     }
 
-    /* ── PAPER ── */
     .paper-wrap { position: relative; }
     .paper-shadow {
       position: absolute;
@@ -56,7 +55,6 @@
       border: 2.5px solid #111;
     }
 
-    /* ── PAPER HEADER ── */
     .paper-header {
       text-align: center;
       padding: 18px 20px 14px;
@@ -81,7 +79,6 @@
       line-height: 1.7;
     }
 
-    /* ── SECTION TITLE ── */
     .section-title {
       background: #0d6c6c;
       color: #fff;
@@ -93,7 +90,6 @@
       border-bottom: 2px solid #111;
     }
 
-    /* ── META FIELDS ── */
     .meta-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -125,7 +121,6 @@
       background: transparent;
     }
 
-    /* ── ORDER ROWS TABLE ── */
     .order-section { padding: 0; }
 
     .order-table {
@@ -164,7 +159,6 @@
       vertical-align: middle;
     }
 
-    /* Inputs inside table */
     .order-table select,
     .order-table input[type="text"] {
       width: 100%;
@@ -183,14 +177,12 @@
       background: #fff;
     }
 
-    /* Calculated amount field */
     .order-table input.amount-field {
       background: #e6faf5;
       color: #0d6c6c;
       font-weight: 700;
     }
 
-    /* Delete button */
     .del-btn {
       background: none;
       border: none;
@@ -227,7 +219,6 @@
     }
     .add-row-btn:hover { background: #0d6c6c; color: #fff; }
 
-    /* ── TOTALS SECTION ── */
     .totals-section {
       padding: 0;
       border-bottom: 2px solid #111;
@@ -264,7 +255,6 @@
       font-size: 14px;
     }
 
-    /* ── SUBMIT BUTTON ── */
     .submit-section {
       padding: 18px 20px;
       display: flex;
@@ -285,7 +275,6 @@
     }
     .submit-btn:hover { background: #0d6c6c; color: yellow; }
 
-    /* ── CARBON STRIP ── */
     .carbon-strip {
       background: #f5f0c0;
       border: 1.5px solid #c8b84a;
@@ -308,7 +297,6 @@
       color: #7a6800;
     }
 
-    /* ── NOTICE ── */
     .notice {
       margin-top: 14px;
       text-align: center;
@@ -329,17 +317,16 @@
     <div class="paper-shadow"></div>
     <div class="paper">
 
-      <!-- Company Header -->
       <div class="paper-header">
-        <div class="co-name">Verification Portal</div>
-        <div class="co-sub">Professional Compliance Services</div>
-        <div class="co-info">
-          123 Healthcare Street, Bloemfontein, 9301<br>
-          <strong>Phone: (012) 555-8900</strong> &nbsp;|&nbsp; compliance@verificationportal.co.za
-        </div>
+        <div class="company-name">Verification Portal</div>
+          <div class="company-tagline">Health Care Services</div>
+          <div class="company-details">
+            123 Healthcareservices Street, Bloemfontein, 0001<br>
+            <strong>Phone: 012 345 6789</strong> &nbsp;|&nbsp; www.verificationportal.co.za<br>
+            email: healthcareservices@verificationportal.co.za
+          </div>
       </div>
-
-      <!-- Meta Info -->
+      
       <div class="section-title">Order Details</div>
       <div class="meta-grid">
         <div class="meta-cell">
@@ -351,7 +338,7 @@
           <span class="meta-val" id="displayDate">—</span>
         </div>
         <div class="meta-cell">
-          <label>Order No.</label>
+          <label>Order Number</label>
           <span class="meta-val" id="displayOrderNo">—</span>
         </div>
         <div class="meta-cell">
@@ -374,7 +361,6 @@
             </tr>
           </thead>
           <tbody id="orderBody">
-            <!-- rows injected by JS -->
           </tbody>
         </table>
 
@@ -383,7 +369,6 @@
         </div>
       </div>
 
-      <!-- Totals -->
       <div class="totals-section">
         <table class="totals-table">
           <tr>
@@ -416,16 +401,15 @@
       </div>
       <div class="sig-block">
         <div class="sig-line"></div>
-        <div class="sig-label">Print Name</div>
+        <div class="sig-label">Date Stamp</div>
       </div>
     </div>
-  </div><!-- /paper-wrap -->
+  </div>
 
   <p class="notice">This order form is for internal records only. The invoice will be generated automatically upon submission.</p>
 </div>
 
 <script>
-  // ── Pull verified client info from sessionStorage ──
   const ORDER_STORAGE_KEY = 'submittedOrders';
   const clientInfo = JSON.parse(sessionStorage.getItem('verifiedClient') || '{}');
   const orderNo = 'ORD-' + Date.now().toString().slice(-6);
@@ -435,7 +419,6 @@
   document.getElementById('displayDate').textContent    = today;
   document.getElementById('displayOrderNo').textContent = orderNo;
 
-  // ── Row management ──
   let rowCount = 0;
 
   function buildQtyOptions() {
