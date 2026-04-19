@@ -88,17 +88,19 @@
       <form id="deliveryForm">
         <div class="mb-3">
           <label for="driverName" class="form-label">Driver's Name</label>
-          <input type="text" class="form-control" id="driverName" name="driverName" placeholder="Enter your full name" required>
+          <input type="text" class="form-control" id="driverName" name="driverName" value="Mrs GroupSeven" readonly required>
         </div>
 
         <div class="mb-3">
           <label for="carModel" class="form-label">Car Model</label>
-          <input type="text" class="form-control" id="carModel" name="carModel" placeholder="Enter your car model" required>
+          <input type="text" class="form-control" id="carModel" name="carModel" value="Toyoal Corollar 2023 ABC123FS" readonly required>
         </div>
 
         <div class="mb-3">
           <label for="orderId" class="form-label">Order ID</label>
-          <input type="text" class="form-control" id="orderId" name="orderId" placeholder="Enter order number" required>
+          <select class="form-control" id="orderId" name="orderId" required>
+            <option value="">Select an order number</option>
+          </select>
         </div>
 
         <button type="submit" class="btn-submit">OK</button>
@@ -109,27 +111,81 @@
   </div>
 
   <script>
+    const ORDER_STORAGE_KEY = 'submittedOrders';
+    const SYSTEM_UPDATES_KEY = 'systemUpdates';
+    const DRIVER_NAMES_KEY = 'deliveryDriverNames';
+    const CAR_MODELS_KEY = 'deliveryCarModels';
+
+    function getSubmittedOrders() {
+      return JSON.parse(localStorage.getItem(ORDER_STORAGE_KEY) || '[]');
+    }
+
+    function setSubmittedOrders(orders) {
+      localStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(orders));
+    }
+
+    function getStoredList(key) {
+      return JSON.parse(localStorage.getItem(key) || '[]');
+    }
+
+    function saveUniqueValue(key, value) {
+      const list = getStoredList(key);
+      if (!list.includes(value)) {
+        list.unshift(value);
+        localStorage.setItem(key, JSON.stringify(list));
+      }
+    }
+
+    function populateOrderDropdown() {
+      const orderSelect = document.getElementById('orderId');
+      const orders = getSubmittedOrders();
+      orderSelect.innerHTML = '<option value="">Select an order number</option>';
+
+      orders.forEach((order) => {
+        const option = document.createElement('option');
+        option.value = order.orderNo;
+        option.textContent = `${order.orderNo} (${order.date || 'No date'})`;
+        orderSelect.appendChild(option);
+      });
+    }
+
     document.getElementById('deliveryForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const driverName = document.getElementById('driverName').value.trim();
       const carModel = document.getElementById('carModel').value.trim();
-      const orderId = document.getElementById('orderId').value.trim();
+      const orderId = document.getElementById('orderId').value;
 
-      const systemMessage = `Order #${orderId} has been delivered by driver ${driverName} with ${carModel} has completed the delivery.`;
-      const storedLogs = JSON.parse(localStorage.getItem('systemUpdates') || '[]');
+      if (!orderId) {
+        alert('Please select an Order ID.');
+        return;
+      }
+
+      const remainingOrders = getSubmittedOrders().filter((order) => order.orderNo !== orderId);
+      setSubmittedOrders(remainingOrders);
+      saveUniqueValue(DRIVER_NAMES_KEY, driverName);
+      saveUniqueValue(CAR_MODELS_KEY, carModel);
+
+      const systemMessage = `Order #${orderId} completed: delivered by ${driverName} using ${carModel}.`;
+      const storedLogs = JSON.parse(localStorage.getItem(SYSTEM_UPDATES_KEY) || '[]');
       storedLogs.push({
-        type: 'delivery',
+        type: 'completed',
         message: systemMessage,
         timestamp: new Date().toISOString()
       });
-      localStorage.setItem('systemUpdates', JSON.stringify(storedLogs));
+      localStorage.setItem(SYSTEM_UPDATES_KEY, JSON.stringify(storedLogs));
 
       const confirmationMessage = document.getElementById('confirmationMessage');
       confirmationMessage.style.display = "block";
-      confirmationMessage.textContent = 'Delivery confirmation submitted.';
+      confirmationMessage.textContent = `Delivery confirmation submitted. Order ${orderId} marked as completed.`;
+      setTimeout(() => {
+        window.location.href = 'Tracking.html';
+      }, 2000);
 
       document.getElementById('deliveryForm').reset();
+      populateOrderDropdown();
     });
+
+    populateOrderDropdown();
   </script>
 
   <!-- Bootstrap JS -->
