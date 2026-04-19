@@ -134,7 +134,6 @@
     </form>
   </div>
 
-  <!-- INVOICE (shown after returning from order.html) -->
   <div class="invoice" id="invoicePanel">
     <div class="invoice-paper-wrap">
       <div class="invoice-paper-shadow"></div>
@@ -142,11 +141,11 @@
 
         <div class="inv-header">
           <div class="company-name">Verification Portal</div>
-          <div class="company-tagline">Professional Compliance Services</div>
+          <div class="company-tagline">Health Care Services</div>
           <div class="company-details">
-            123 Healthcare Street, Bloemfontein, 0001<br>
-            <strong>Phone: (012) 555-8900</strong> &nbsp;|&nbsp; www.verificationportal.co.za<br>
-            email: compliance@verificationportal.co.za
+            123 Healthcareservices Street, Bloemfontein, 0001<br>
+            <strong>Phone: 012 345 6789</strong> &nbsp;|&nbsp; www.verificationportal.co.za<br>
+            email: healthcareservices@verificationportal.co.za
           </div>
         </div>
 
@@ -170,7 +169,7 @@
           <div class="inv-meta-row">
             <div class="meta-field">
               <span class="meta-label">Address</span>
-              <span class="meta-value">Healthcare Practice</span>
+              <span class="meta-value">Healthcare Practice Services</span>
             </div>
           </div>
           <div class="inv-meta-row" style="margin-bottom:8px;">
@@ -213,7 +212,7 @@
           </div>
           <div class="inv-sig-block">
             <div class="inv-sig-line"></div>
-            <div class="inv-sig-label">Print Name</div>
+            <div class="inv-sig-label">Date Stamp</div>
           </div>
         </div>
       </div>
@@ -226,7 +225,7 @@
           </div>
           <div class="inv-sig-block">
             <div class="inv-sig-line"></div>
-            <div class="inv-sig-label">Print Name</div>
+            <div class="inv-sig-label">Date Stamp</div>
           </div>
         </div>
       </div>
@@ -394,5 +393,8 @@
     doc.save((d.orderNo || 'invoice') + '.pdf');
   }
 </script>
+   <footer style="text-align: center; padding: 15px; margin-top: 20px; color: #555; font-size: 0.9rem; font-family: Arial, sans-serif;">
+    &copy; Designed by Amukelani Phakula
+  </footer>
 </body>
 </html>
