@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Verification Portal</title>
-  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,14 +10,17 @@
       background: white;
     }
     .container {
-      max-width: 660px;
+      max-width: 600px;
       margin: 40px auto;
       padding: 20px;
       border-left: 20px solid teal;
       border-right: 20px solid rgb(255, 196, 0);
       background: white;
     }
-    h2 { color: teal; text-align: center; }
+    h2 {
+      color: teal;
+      text-align: center;
+    }
     label {
       display: block;
       margin-bottom: 8px;
@@ -31,10 +33,11 @@
       margin-bottom: 12px;
       border: 2px solid teal;
       background: white;
-      box-sizing: border-box;
     }
-    input[type="file"] { border: 2px solid yellow; }
-    button[type="submit"] {
+    input[type="file"] {
+      border: 2px solid yellow;
+    }
+    button {
       padding: 10px 20px;
       background: yellow;
       color: teal;
@@ -43,340 +46,247 @@
       cursor: pointer;
       width: 100%;
     }
-    button[type="submit"]:disabled { background: #ccc; cursor: not-allowed; }
-    .status { margin-top: 15px; font-weight: bold; color: teal; text-align: center; }
-    .redirect-hint { margin-top: 10px; text-align: center; font-size: 13px; color: teal; display: none; }
-    .auto-doc {
-      margin-bottom: 12px;
-      padding: 8px;
-      border: 2px solid yellow;
-      color: teal;
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .status {
+      margin-top: 15px;
       font-weight: bold;
+      color: teal;
       text-align: center;
-      background: #fffef0;
     }
 
-    .order-card {
-      display: none;
+    .invoice {
       margin-top: 18px;
       border: 2px solid teal;
+      border-radius: 8px;
       padding: 14px;
-      background: #f8fffe;
-    }
-    .order-title {
-      margin: 0 0 12px;
-      text-align: center;
-      color: teal;
-      font-size: 20px;
-    }
-    .order-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .order-grid .full {
-      grid-column: 1 / -1;
-    }
-    .order-grid input {
-      width: 100%;
-      padding: 8px;
-      border: 2px solid teal;
-      background: #f1fffd;
-      box-sizing: border-box;
-      color: #103b39;
-      font-weight: bold;
-    }
-    .submit-order-btn {
-      width: 100%;
-      padding: 12px;
-      background: yellow;
-      color: teal;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 15px;
-    }
-    .submit-order-btn:hover {
-      background: teal;
-      color: yellow;
-    }
-
-    /* ── RECEIPT INVOICE ── */
-    .invoice {
       display: none;
-      margin-top: 24px;
-      font-family: 'Courier Prime', 'Courier New', monospace;
-      font-size: 13px;
-      color: #111;
+      background: #f7fffd;
     }
-    .invoice-paper-wrap { position: relative; }
-    .invoice-paper-shadow {
-      position: absolute; top: 8px; left: 8px;
-      width: 100%; height: 100%;
-      background: #f5f0c0; border: 1.5px solid #c8b84a; z-index: 0;
+
+    .invoice h3 {
+      margin-top: 0;
+      color: teal;
     }
-    .invoice-paper { position: relative; z-index: 1; background: #fff; border: 2px solid #111; }
 
-    .inv-header { text-align: center; padding: 18px 20px 12px; border-bottom: 2px solid #111; }
-    .inv-header .company-name { font-family: 'Special Elite', serif; font-size: 26px; font-weight: 900; letter-spacing: 1px; margin: 0 0 2px; }
-    .inv-header .company-tagline { font-style: italic; font-size: 13px; margin: 0 0 4px; }
-    .inv-header .company-details { font-size: 12px; line-height: 1.6; margin: 0; }
-
-    .inv-meta { padding: 10px 14px 0; border-bottom: 2px solid #111; }
-    .inv-meta-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-end; }
-    .meta-field { display: flex; align-items: flex-end; gap: 4px; flex: 1; }
-    .meta-label { font-weight: 700; white-space: nowrap; font-size: 12px; }
-    .meta-value { border-bottom: 1px solid #555; flex: 1; min-width: 60px; font-size: 12px; padding-bottom: 1px; }
-
-    .inv-summary-row { display: flex; border-top: 2px solid #111; border-bottom: 2px solid #111; }
-    .sum-cell { flex: 1; border-right: 1px solid #555; padding: 5px 6px; font-size: 11px; font-weight: 700; text-align: center; text-transform: uppercase; line-height: 1.3; }
-    .sum-cell:last-child { border-right: none; }
-    .sum-val { display: block; height: 18px; border-bottom: 1px solid #999; }
-
-    .inv-table { width: 100%; border-collapse: collapse; }
-    .inv-table th {
-      background: #fff; border: 1px solid #111; border-top: 2px solid #111;
-      padding: 5px 7px; font-size: 11px; font-weight: 900;
-      text-transform: uppercase; text-align: center; letter-spacing: 0.5px;
+    .invoice-meta {
+      margin-bottom: 10px;
+      color: #0f766e;
+      font-weight: bold;
     }
-    .inv-table th:first-child { width: 70px; }
-    .inv-table th:nth-child(3) { width: 80px; }
-    .inv-table th:last-child { width: 90px; }
-    .inv-table td { border: 1px solid #aaa; border-top: none; padding: 5px 7px; height: 22px; font-size: 12px; }
-    .inv-table td:first-child, .inv-table td:nth-child(3), .inv-table td:last-child { text-align: right; }
-    .inv-table .blank-row td { color: transparent; height: 20px; }
-    .inv-table .tax-row td, .inv-table .total-row td { border: 1px solid #111; }
-    .inv-table .tax-row td:first-child, .inv-table .total-row td:first-child {
-      text-align: right; font-weight: 700; padding-right: 8px;
-      font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+
+    .invoice table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0 12px;
     }
-    .inv-table .total-row td:last-child, .inv-table .tax-row td:last-child { font-weight: 700; }
 
-    .inv-signatures { display: flex; padding: 18px 20px 10px; gap: 30px; border-top: 2px solid #111; }
-    .inv-sig-block { flex: 1; text-align: center; }
-    .inv-sig-line { border-bottom: 1.5px solid #111; height: 30px; margin-bottom: 4px; }
-    .inv-sig-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+    .invoice th,
+    .invoice td {
+      border: 1px solid #99d5cc;
+      padding: 8px;
+      text-align: left;
+    }
 
-    .inv-carbon { background: #f5f0c0; border: 1.5px solid #c8b84a; border-top: none; padding: 12px 20px 8px; }
-    .inv-carbon .inv-signatures { border-top: none; padding-top: 4px; }
-    .inv-carbon .inv-sig-line { border-bottom-color: #c8b84a; }
+    .invoice th {
+      background: #e6faf5;
+      color: teal;
+    }
 
-    .invoice-actions { margin-top: 16px; display: flex; justify-content: flex-end; }
+    .invoice-total {
+      text-align: right;
+      font-weight: bold;
+      color: teal;
+      margin: 0;
+    }
+
+    .invoice-actions {
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
     .invoice-actions button {
-      padding: 10px 28px; background: yellow; color: teal;
-      font-weight: bold; border: 2px solid teal; cursor: pointer;
-      font-size: 14px; font-family: Arial, sans-serif;
+      width: auto;
+      min-width: 150px;
     }
-    .invoice-actions button:hover { background: teal; color: yellow; }
   </style>
 </head>
 <body>
-<div class="container">
-  <h2>Verification</h2>
-
-  <div id="verificationSection">
+  <div class="container">
+    <h2>Verification</h2>
     <form id="verificationForm">
-      <label for="practiceNumber">Please enter your practise number</label>
+      <label for="practiceNumber"> Please enter your HPCSA Registration or BHF Practice Number</label>
       <input type="text" id="practiceNumber" name="practiceNumber" required>
 
-      <div class="auto-doc" id="autoDocMessage">Registration.pdf uploaded automatically.</div>
+      <label for="documentUpload">Upload Registration Document</label>
+      <input type="file" id="documentUpload" name="documentUpload" accept=".pdf,.jpg,.png" required>
 
-      <button type="submit">Verify &amp; Proceed</button>
+      <button type="submit">Verify & Proceed</button>
       <div class="status" id="statusMessage"></div>
-      <div class="redirect-hint" id="redirectHint">Verified. Order form is now ready.</div>
+
+      <div class="invoice" id="invoicePanel">
+        <h3>Invoice</h3>
+        <div class="invoice-meta" id="invoiceMeta"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th>Line Total</th>
+            </tr>
+          </thead>
+          <tbody id="invoiceBody"></tbody>
+        </table>
+        <p class="invoice-total" id="invoiceTotal"></p>
+        <div class="invoice-actions">
+          <button type="button" id="printInvoiceBtn">Print Invoice</button>
+        </div>
+      </div>
     </form>
   </div>
 
-  <div class="order-card" id="orderCard">
-    <h3 class="order-title">Order Form</h3>
-    <div class="order-grid">
-      <div>
-        <label for="orderPractice">Practise Number</label>
-        <input type="text" id="orderPractice" readonly>
-      </div>
-      <div>
-        <label for="orderNo">Order No.</label>
-        <input type="text" id="orderNo" readonly>
-      </div>
-      <div>
-        <label for="orderDate">Date</label>
-        <input type="text" id="orderDate" readonly>
-      </div>
-      <div>
-        <label for="orderQty">Quantity</label>
-        <input type="text" id="orderQty" value="1000" readonly>
-      </div>
-      <div class="full">
-        <label for="orderDesc">Description</label>
-        <input type="text" id="orderDesc" value="FirstAidKits(100 each)" readonly>
-      </div>
-      <div>
-        <label for="orderPrice">Price</label>
-        <input type="text" id="orderPrice" value="R 65.00" readonly>
-      </div>
-      <div>
-        <label for="orderAmount">Amount</label>
-        <input type="text" id="orderAmount" value="R 65000.00" readonly>
-      </div>
-    </div>
-    <button type="button" class="submit-order-btn" id="submitOrderPrintBtn">Submit Order &amp; Print</button>
-  </div>
-</div>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script>
+    let currentInvoiceData = null;
 
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-<script>
-  const ORDER_STORAGE_KEY = 'submittedOrders';
-  const SYSTEM_UPDATES_KEY = 'systemUpdates';
-  const AUTO_DOCUMENT_NAME = 'Registration.pdf';
-
-  let verifiedPracticeNumber = '';
-
-  // ── Verification form ──
-  document.getElementById('verificationForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    const practiceNumber = document.getElementById('practiceNumber').value.trim();
-    const statusEl = document.getElementById('statusMessage');
-    const hintEl   = document.getElementById('redirectHint');
-
-    if (!practiceNumber) {
-      statusEl.textContent = 'Please provide your practise number.';
-      return;
-    }
-    statusEl.textContent = `Verifying with ${AUTO_DOCUMENT_NAME}...`;
-
-    setTimeout(() => {
-      verifiedPracticeNumber = practiceNumber;
-      statusEl.textContent = '';
-      hintEl.style.display = 'block';
-      showOrderForm(practiceNumber);
-    }, 1200);
-  });
-
-  function showOrderForm(practiceNumber) {
-    const now = new Date();
-    const orderNo = 'ORD-' + now.getTime().toString().slice(-6);
-    const date = now.toLocaleDateString('en-ZA');
-
-    document.getElementById('orderPractice').value = practiceNumber;
-    document.getElementById('orderNo').value = orderNo;
-    document.getElementById('orderDate').value = date;
-
-    document.getElementById('orderCard').style.display = 'block';
-  }
-
-  function saveOrder(orderData) {
-    const storedOrders = JSON.parse(localStorage.getItem(ORDER_STORAGE_KEY) || '[]');
-    const deduped = storedOrders.filter((o) => o.orderNo !== orderData.orderNo);
-    deduped.unshift(orderData);
-    localStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(deduped));
-  }
-
-  function saveSystemUpdate(orderNo) {
-    const updates = JSON.parse(localStorage.getItem(SYSTEM_UPDATES_KEY) || '[]');
-    updates.push({
-      type: 'order',
-      message: `Order #${orderNo} has been submitted.`,
-      timestamp: new Date().toISOString(),
-      orderId: orderNo
-    });
-    localStorage.setItem(SYSTEM_UPDATES_KEY, JSON.stringify(updates));
-  }
-
-  document.getElementById('submitOrderPrintBtn').addEventListener('click', function () {
-    if (!verifiedPracticeNumber) {
-      alert('Please verify your practise number first.');
-      return;
+    function generateInvoiceNumber() {
+      const stamp = Date.now().toString().slice(-6);
+      return 'INV-' + stamp;
     }
 
-    const orderNo = document.getElementById('orderNo').value;
-    const date = document.getElementById('orderDate').value;
-    const qty = 1000;
-    const desc = 'FirstAidKits(100 each)';
-    const price = 65;
-    const amount = qty * price;
-    const tax = amount * 0.15;
-    const total = amount + tax;
+    function renderInvoice(practiceNumber) {
+      const invoicePanel = document.getElementById('invoicePanel');
+      const invoiceMeta = document.getElementById('invoiceMeta');
+      const invoiceBody = document.getElementById('invoiceBody');
+      const invoiceTotal = document.getElementById('invoiceTotal');
 
-    const orderData = {
-      orderNo,
-      date,
-      practiceNumber: verifiedPracticeNumber,
-      rows: [{ qty, desc, price, amount }],
-      subtotal: amount,
-      tax,
-      total,
-      createdAt: new Date().toISOString()
-    };
+      const rows = [
+        {
+          description: 'Verification Processing Fee',
+          qty: 1,
+          unitPrice: 450
+        },
+        {
+          description: 'Compliance Document Review',
+          qty: 1,
+          unitPrice: 350
+        }
+      ];
 
-    saveOrder(orderData);
-    saveSystemUpdate(orderNo);
-    generateInvoicePdf(orderData);
+      const grandTotal = rows.reduce(function(sum, row) {
+        return sum + (row.qty * row.unitPrice);
+      }, 0);
 
-    setTimeout(() => {
-      window.location.href = 'Home.html';
-    }, 1200);
-  });
+      const invoiceNumber = generateInvoiceNumber();
+      const today = new Date().toLocaleDateString();
+      invoiceMeta.textContent = 'Invoice No: ' + invoiceNumber + ' | Date: ' + today + ' | Client: ' + practiceNumber;
 
-  function generateInvoicePdf(d) {
-    const jsPDF = window.jspdf.jsPDF;
-    const doc   = new jsPDF();
+      currentInvoiceData = {
+        invoiceNumber: invoiceNumber,
+        date: today,
+        client: practiceNumber,
+        rows: rows,
+        grandTotal: grandTotal
+      };
 
-    doc.setFontSize(20); doc.setFont(undefined, 'bold');
-    doc.text('Verification Portal', 105, 18, { align: 'center' });
-    doc.setFontSize(11); doc.setFont(undefined, 'italic');
-    doc.text('Professional Compliance Services', 105, 25, { align: 'center' });
-    doc.setFont(undefined, 'normal'); doc.setFontSize(10);
-    doc.text('123 Healthcare Street, Bloemfontein, 9301', 105, 31, { align: 'center' });
-    doc.text('Phone: (012) 555-8900  |  compliance@verificationportal.co.za', 105, 37, { align: 'center' });
-    doc.line(14, 41, 195, 41);
+      invoiceBody.innerHTML = '';
+      rows.forEach(function(row) {
+        const tr = document.createElement('tr');
+        const lineTotal = row.qty * row.unitPrice;
+        tr.innerHTML =
+          '<td>' + row.description + '</td>' +
+          '<td>' + row.qty + '</td>' +
+          '<td>R ' + row.unitPrice.toFixed(2) + '</td>' +
+          '<td>R ' + lineTotal.toFixed(2) + '</td>';
+        invoiceBody.appendChild(tr);
+      });
 
-    doc.setFontSize(11); doc.setFont(undefined, 'bold');
-    doc.text('Order No: ', 14, 49);
-    doc.setFont(undefined, 'normal'); doc.text(d.orderNo, 42, 49);
-    doc.setFont(undefined, 'bold'); doc.text('Date: ', 140, 49);
-    doc.setFont(undefined, 'normal'); doc.text(d.date, 155, 49);
-    doc.setFont(undefined, 'bold'); doc.text('Name: ', 14, 57);
-    doc.setFont(undefined, 'normal'); doc.text(d.practiceNumber, 30, 57);
-    doc.line(14, 61, 195, 61);
+      invoiceTotal.textContent = 'Total: R ' + grandTotal.toFixed(2);
+      invoicePanel.style.display = 'block';
+    }
 
-    let y = 68;
-    doc.setFont(undefined, 'bold'); doc.setFontSize(11);
-    doc.text('QTY', 14, y); doc.text('Description', 40, y);
-    doc.text('Price', 145, y); doc.text('Amount', 170, y);
-    doc.setFont(undefined, 'normal');
-    doc.line(14, y + 2, 195, y + 2); y += 10;
+    function hideInvoice() {
+      document.getElementById('invoicePanel').style.display = 'none';
+      currentInvoiceData = null;
+    }
 
-    d.rows.forEach((row) => {
-      doc.setFontSize(10);
-      doc.text(String(row.qty), 14, y);
-      doc.text(row.desc, 40, y);
-      doc.text('R ' + row.price.toFixed(2), 145, y);
-      doc.text('R ' + row.amount.toFixed(2), 170, y);
+    function generateInvoicePdf(invoiceData) {
+      const jsPDF = window.jspdf.jsPDF;
+      const doc = new jsPDF();
+
+      doc.setFontSize(18);
+      doc.text('Invoice', 14, 18);
+
+      doc.setFontSize(12);
+      doc.text('Invoice No: ' + invoiceData.invoiceNumber, 14, 30);
+      doc.text('Date: ' + invoiceData.date, 14, 38);
+      doc.text('Client: ' + invoiceData.client, 14, 46);
+
+      let y = 60;
+      doc.setFont(undefined, 'bold');
+      doc.text('Description', 14, y);
+      doc.text('Qty', 110, y);
+      doc.text('Unit Price', 130, y);
+      doc.text('Line Total', 170, y);
+      doc.setFont(undefined, 'normal');
+
       y += 8;
+      doc.line(14, y - 4, 195, y - 4);
+
+      invoiceData.rows.forEach(function(row) {
+        const lineTotal = row.qty * row.unitPrice;
+        doc.text(row.description, 14, y);
+        doc.text(String(row.qty), 110, y);
+        doc.text('R ' + row.unitPrice.toFixed(2), 130, y);
+        doc.text('R ' + lineTotal.toFixed(2), 170, y);
+        y += 8;
+      });
+
+      y += 4;
+      doc.line(14, y - 2, 195, y - 2);
+      doc.setFont(undefined, 'bold');
+      doc.text('Total: R ' + invoiceData.grandTotal.toFixed(2), 140, y + 8);
+
+      const fileName = invoiceData.invoiceNumber + '.pdf';
+      doc.save(fileName);
+    }
+
+    document.getElementById('verificationForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const practiceNumber = document.getElementById('practiceNumber').value;
+      const file = document.getElementById('documentUpload').files[0];
+      const statusMessage = document.getElementById('statusMessage');
+
+      if (!practiceNumber || !file) {
+        statusMessage.textContent = "Please provide all required information.";
+        return;
+      }
+
+      statusMessage.textContent = "Verifying...";
+
+      // Simulated API call
+      setTimeout(() => {
+        if (practiceNumber.startsWith("HPCSA") || practiceNumber.startsWith("BHF")) {
+          statusMessage.textContent = "Verification successful. Invoice can now be generated.";
+          renderInvoice(practiceNumber);
+        } else {
+          statusMessage.textContent = "Verification failed. Please check your details.";
+          hideInvoice();
+        }
+      }, 2000);
     });
 
-    y += 10; doc.line(14, y - 4, 195, y - 4);
-    doc.setFont(undefined, 'bold'); doc.setFontSize(11);
-    doc.text('SALES TAX (15%)', 115, y);
-    doc.setFont(undefined, 'normal');
-    doc.text('R ' + d.tax.toFixed(2), 170, y); y += 8;
-    doc.setFont(undefined, 'bold');
-    doc.text('TOTAL', 115, y);
-    doc.text('R ' + d.total.toFixed(2), 170, y);
-    doc.line(14, y + 3, 195, y + 3);
-
-    y += 22;
-    doc.setFont(undefined, 'normal'); doc.setFontSize(10);
-    doc.line(14, y, 85, y); doc.line(110, y, 195, y); y += 5;
-    doc.text('SIGNATURE', 49, y, { align: 'center' });
-    doc.text('PRINT NAME', 152, y, { align: 'center' });
-
-    doc.save((d.orderNo || 'invoice') + '.pdf');
-  }
-</script>
-  <footer style="text-align: center; padding: 15px; margin-top: 20px; color: #555; font-size: 0.9rem; font-family: Arial, sans-serif;">
-    &copy; Designed by Amukelani Phakula
-  </footer>
+    document.getElementById('printInvoiceBtn').addEventListener('click', function() {
+      if (!currentInvoiceData) {
+        alert('Please complete verification first to generate the invoice PDF.');
+        return;
+      }
+      generateInvoicePdf(currentInvoiceData);
+    });
+  </script>
 </body>
 </html>
