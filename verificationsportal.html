@@ -114,6 +114,55 @@
       font-size: 14px; font-family: Arial, sans-serif;
     }
     .invoice-actions button:hover { background: teal; color: yellow; }
+
+    /* ── ORDER FORM ── */
+    .order-card {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      border: 2px solid teal;
+      background: #f8fffe;
+    }
+    .order-card h3 {
+      color: teal;
+      text-align: center;
+      margin-top: 0;
+    }
+    .order-field {
+      margin-bottom: 15px;
+    }
+    .order-field label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: teal;
+    }
+    .order-field input,
+    .order-field select {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid teal;
+      background: white;
+      color: teal;
+      font-weight: bold;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    .order-btn {
+      width: 100%;
+      padding: 12px;
+      background: yellow;
+      color: teal;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 15px;
+      margin-top: 10px;
+    }
+    .order-btn:hover {
+      background: teal;
+      color: yellow;
+    }
   </style>
 </head>
 <body>
@@ -132,6 +181,26 @@
       <div class="status" id="statusMessage"></div>
       <div class="redirect-hint" id="redirectHint">Verified! Opening Order Form…</div>
     </form>
+  </div>
+
+  <div class="order-card" id="orderCard">
+    <h3>Order Information</h3>
+    <div class="order-field">
+      <label for="personInCharge">Person In Charge Name</label>
+      <input type="text" id="personInCharge" placeholder="Enter your full name" required>
+    </div>
+    <div class="order-field">
+      <label for="paymentMethod">Payment Method</label>
+      <select id="paymentMethod" required>
+        <option value="">-- Select Payment Method --</option>
+        <option value="Card">Card (Credit/Debit)</option>
+        <option value="Cash">Cash</option>
+        <option value="Bank Transfer">Bank Transfer</option>
+        <option value="Check">Check</option>
+        <option value="Mobile Payment">Mobile Payment</option>
+      </select>
+    </div>
+    <button type="button" class="order-btn" id="proceedToInvoiceBtn">Proceed to Invoice</button>
   </div>
 
   <div class="invoice" id="invoicePanel">
@@ -265,11 +334,52 @@
         statusEl.textContent = '';
         hintEl.style.display = 'block';
         sessionStorage.setItem('verifiedClient', JSON.stringify({ practiceNumber }));
-        setTimeout(() => { window.location.href = 'Order.html'; }, 1200);
+        showOrderForm(practiceNumber);
       } else {
         statusEl.textContent = 'Verification failed. Please check your details.';
       }
     }, 2000);
+  });
+
+  // ── Show order form ──
+  function showOrderForm(practiceNumber) {
+    document.getElementById('verificationSection').style.display = 'none';
+    document.getElementById('orderCard').style.display = 'block';
+  }
+
+  // ── Handle order form submission ──
+  document.getElementById('proceedToInvoiceBtn').addEventListener('click', function () {
+    const personInCharge = document.getElementById('personInCharge').value.trim();
+    const paymentMethod = document.getElementById('paymentMethod').value;
+
+    if (!personInCharge) {
+      alert('Please enter the name of the person in charge.');
+      return;
+    }
+
+    if (!paymentMethod) {
+      alert('Please select a payment method.');
+      return;
+    }
+
+    const verifiedData = JSON.parse(sessionStorage.getItem('verifiedClient') || '{}');
+    const now = new Date();
+    const orderNo = 'ORD-' + now.getTime().toString().slice(-6);
+    const date = now.toLocaleDateString('en-ZA');
+
+    const orderData = {
+      orderNo,
+      date,
+      practiceNumber: verifiedData.practiceNumber,
+      personInCharge,
+      paymentMethod,
+      rows: [{ qty: 1000, desc: 'FirstAidKits(100 each)', price: 65, amount: 65000 }],
+      subtotal: 65000,
+      tax: 65000 * 0.15,
+      total: 65000 + (65000 * 0.15)
+    };
+
+    renderInvoiceFromOrder(orderData);
   });
 
   // ── Render invoice from order data ──
@@ -347,11 +457,15 @@
     doc.setFont(undefined, 'normal'); doc.text(d.orderNo, 42, 49);
     doc.setFont(undefined, 'bold'); doc.text('Date: ', 140, 49);
     doc.setFont(undefined, 'normal'); doc.text(d.date, 155, 49);
-    doc.setFont(undefined, 'bold'); doc.text('Name: ', 14, 57);
-    doc.setFont(undefined, 'normal'); doc.text(d.practiceNumber, 30, 57);
-    doc.line(14, 61, 195, 61);
+    doc.setFont(undefined, 'bold'); doc.text('Practice: ', 14, 57);
+    doc.setFont(undefined, 'normal'); doc.text(d.practiceNumber, 40, 57);
+    doc.setFont(undefined, 'bold'); doc.text('In Charge: ', 14, 65);
+    doc.setFont(undefined, 'normal'); doc.text(d.personInCharge, 40, 65);
+    doc.setFont(undefined, 'bold'); doc.text('Payment: ', 140, 65);
+    doc.setFont(undefined, 'normal'); doc.text(d.paymentMethod, 168, 65);
+    doc.line(14, 69, 195, 69);
 
-    let y = 68;
+    let y = 76;
     doc.setFont(undefined, 'bold'); doc.setFontSize(11);
     doc.text('QTY', 14, y); doc.text('Description', 40, y);
     doc.text('Price', 145, y); doc.text('Amount', 170, y);
